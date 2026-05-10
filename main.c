@@ -107,14 +107,14 @@ void write_machine_code_to_file(struct machine_code_s *mcs, const char *filename
     };
 
 
-    unsigned char exit_code[] = {
-        0x48, 0xc7, 0xc0, 0x3c, 0x00, 0x00, 0x00, // mov rax, 60
-        0x48, 0x31, 0xff,                         // xor rdi, rdi
-        0x0f, 0x05                                // syscall
-    };
+    // unsigned char exit_code[] = {
+    //     0x48, 0xc7, 0xc0, 0x3c, 0x00, 0x00, 0x00, // mov rax, 60
+    //     0x48, 0x31, 0xff,                         // xor rdi, rdi
+    //     0x0f, 0x05                                // syscall
+    // };
 
  
-    uint64_t code_size = mcs->size + sizeof(exit_code);
+    uint64_t code_size = mcs->size ;//+ sizeof(exit_code);
     uint64_t file_size = sizeof(elf_header) + sizeof(program_header) + code_size;
 
 
@@ -131,7 +131,7 @@ void write_machine_code_to_file(struct machine_code_s *mcs, const char *filename
 
 
     fwrite(mcs->code, 1, mcs->size, f);
-    fwrite(exit_code, 1, sizeof(exit_code), f);
+    // fwrite(exit_code, 1, sizeof(exit_code), f);
 
     fclose(f);
     chmod(filename, 0755);

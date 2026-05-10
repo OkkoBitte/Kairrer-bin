@@ -117,7 +117,7 @@ void parsing(struct tokens_s** tokens, struct operation_mode_s* opm, struct pars
         }
         else if(current_type == ENDL){
             (*ret)->elements[element_count].type = OPERATOR;
-            (*ret)->elements[element_count].vtype = O_END;
+            (*ret)->elements[element_count].otype = O_END;
             (*ret)->elements[element_count].value = malloc(2);
             (*ret)->elements[element_count].value[0] = current_value;
             (*ret)->elements[element_count].value[1] = '\0';

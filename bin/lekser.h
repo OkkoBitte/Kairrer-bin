@@ -91,18 +91,9 @@ struct line_s getComLine(struct leks_context_s* context) {
     return retLines;
 }
 
-// use 1 line
-// void handleLine(struct leks_context_s* context, struct line_s * lines){
-//     // any use to 64bitCPU
-//     printf("LINE: ");
-//     for (int i = 0; i < lines->num; i++){
-//         printf("%s",lines->elements[i].value);
-//     }
-//     printf("\n");
-// }
-
 
 void handleLine(struct leks_context_s* context, struct line_s* line) {
+
     printf("Processing line with %d elements: ", line->num);
     for (int i = 0; i < line->num; i++) {
         printf("%s ", line->elements[i].value);
@@ -115,10 +106,19 @@ void handleLine(struct leks_context_s* context, struct line_s* line) {
             line->elements[1].type == OPERATOR && 
             line->elements[1].otype == O_END) {
             
-            if (strcmp(line->elements[0].value, "s") == 0) {
-                printf("Generating SYSCALL (with end)\n");
-                add16BitData(context, 0x050F); // SYSCALL
-            } 
+           if (strcmp(line->elements[0].value, "s") == 0) {
+                // mov rax, 60
+                addData(context, 0x48);
+                addData(context, 0xC7);
+                addData(context, 0xC0);
+                add32BitData(context, 60);
+                // xor rdi, rdi  
+                addData(context, 0x48);
+                addData(context, 0x31);
+                addData(context, 0xFF);
+                // syscall
+                add16BitData(context, 0x050F);
+            }
             else if (strcmp(line->elements[0].value, "r") == 0) {
                 printf("Generating RET (with end)\n");
                 addData(context, 0xC3); // RET
@@ -158,8 +158,9 @@ void handleLine(struct leks_context_s* context, struct line_s* line) {
             
             //  MOV r64, imm32
             uint8_t rex = getRexPrefix(dest_reg, 0);
-            addData(context, rex);
-            addData(context, 0xB8 + (dest_reg & 7));
+            addData(context, 0x48 | ((dest_reg >> 3) & 1));
+            addData(context, 0xC7);
+            addData(context, 0xC0 | (dest_reg & 7));
             add32BitData(context, value);
             
         } 
@@ -235,7 +236,7 @@ void leksering(struct pars_s** pars, struct operation_mode_s *cmd, struct machin
     }
     context.ident = 0;
   
-    for (context.ident; context.ident < wremLineCount; context.ident++) {
+    for (; context.ident < wremLineCount; context.ident++) {
         struct line_s currentLine = lines[context.ident];
         
         handleLine(&context, &currentLine);
